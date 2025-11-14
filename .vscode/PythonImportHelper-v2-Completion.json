@@ -1,5 +1,78 @@
 [
     {
+        "label": "TextAnimator",
+        "importPath": "textAnimator",
+        "description": "textAnimator",
+        "isExtraImport": true,
+        "detail": "textAnimator",
+        "documentation": {}
+    },
+    {
+        "label": "Style",
+        "importPath": "textAnimator",
+        "description": "textAnimator",
+        "isExtraImport": true,
+        "detail": "textAnimator",
+        "documentation": {}
+    },
+    {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "MODES",
+        "importPath": "textAnimator.modes",
+        "description": "textAnimator.modes",
+        "isExtraImport": true,
+        "detail": "textAnimator.modes",
+        "documentation": {}
+    },
+    {
+        "label": "AnimatorFlags",
+        "importPath": "textAnimator.flags",
+        "description": "textAnimator.flags",
+        "isExtraImport": true,
+        "detail": "textAnimator.flags",
+        "documentation": {}
+    },
+    {
+        "label": "Color",
+        "importPath": "textAnimator.ansi",
+        "description": "textAnimator.ansi",
+        "isExtraImport": true,
+        "detail": "textAnimator.ansi",
+        "documentation": {}
+    },
+    {
+        "label": "MultiTextAnimator",
+        "importPath": "textAnimator.multiline",
+        "description": "textAnimator.multiline",
+        "isExtraImport": true,
+        "detail": "textAnimator.multiline",
+        "documentation": {}
+    },
+    {
+        "label": "MultiTextMode",
+        "importPath": "textAnimator.multiline",
+        "description": "textAnimator.multiline",
+        "isExtraImport": true,
+        "detail": "textAnimator.multiline",
+        "documentation": {}
+    },
+    {
+        "label": "TextConfig",
+        "importPath": "textAnimator.multiline",
+        "description": "textAnimator.multiline",
+        "isExtraImport": true,
+        "detail": "textAnimator.multiline",
+        "documentation": {}
+    },
+    {
         "label": "random",
         "kind": 6,
         "isExtraImport": true,
@@ -122,15 +195,6 @@
         "documentation": {}
     },
     {
-        "label": "asyncio",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "asyncio",
-        "description": "asyncio",
-        "detail": "asyncio",
-        "documentation": {}
-    },
-    {
         "label": "ansi_fg256",
         "importPath": "textAnimator.colors",
         "description": "textAnimator.colors",
@@ -203,67 +267,21 @@
         "documentation": {}
     },
     {
-        "label": "TextAnimator",
-        "importPath": "textAnimator",
-        "description": "textAnimator",
-        "isExtraImport": true,
-        "detail": "textAnimator",
+        "label": "animator",
+        "kind": 5,
+        "importPath": "examples.test1",
+        "description": "examples.test1",
+        "peekOfCode": "animator = TextAnimator(\n    \"HELLO WORLD!\",\n    mode=\"reverse_writer\",\n    interval=0.005,\n    paint=Color.GREEN.value,\n    style=Style.BOLD,\n    flags=AnimatorFlags.HideCursor\n)\nasyncio.run(animator.start())\nwhile True:",
+        "detail": "examples.test1",
         "documentation": {}
     },
     {
-        "label": "Style",
-        "importPath": "textAnimator",
-        "description": "textAnimator",
-        "isExtraImport": true,
-        "detail": "textAnimator",
-        "documentation": {}
-    },
-    {
-        "label": "MODES",
-        "importPath": "textAnimator.modes",
-        "description": "textAnimator.modes",
-        "isExtraImport": true,
-        "detail": "textAnimator.modes",
-        "documentation": {}
-    },
-    {
-        "label": "AnimatorFlags",
-        "importPath": "textAnimator.flags",
-        "description": "textAnimator.flags",
-        "isExtraImport": true,
-        "detail": "textAnimator.flags",
-        "documentation": {}
-    },
-    {
-        "label": "Color",
-        "importPath": "textAnimator.ansi",
-        "description": "textAnimator.ansi",
-        "isExtraImport": true,
-        "detail": "textAnimator.ansi",
-        "documentation": {}
-    },
-    {
-        "label": "MultiTextAnimator",
-        "importPath": "textAnimator.multiline",
-        "description": "textAnimator.multiline",
-        "isExtraImport": true,
-        "detail": "textAnimator.multiline",
-        "documentation": {}
-    },
-    {
-        "label": "MultiTextMode",
-        "importPath": "textAnimator.multiline",
-        "description": "textAnimator.multiline",
-        "isExtraImport": true,
-        "detail": "textAnimator.multiline",
-        "documentation": {}
-    },
-    {
-        "label": "TextConfig",
-        "importPath": "textAnimator.multiline",
-        "description": "textAnimator.multiline",
-        "isExtraImport": true,
-        "detail": "textAnimator.multiline",
+        "label": "animator",
+        "kind": 5,
+        "importPath": "examples.test2",
+        "description": "examples.test2",
+        "peekOfCode": "animator = MultiTextAnimator(texts=[\"Line 1\", \"Line 2\"])\n# Method chaining works!\nanimator[0](\"hello\", \"typewriter\", paint=(255, 0, 0))\nanimator[1](\"world\", \"slide\", paint=(0, 0, 255))\nasyncio.run(animator.start())",
+        "detail": "examples.test2",
         "documentation": {}
     },
     {
@@ -480,24 +498,6 @@
         "description": "textAnimator.multiline",
         "peekOfCode": "class MultiTextAnimator:\n    \"\"\"\n    Multi-line text animator with synchronized coordination.\n    Extends TextAnimator functionality to handle multiple lines with:\n    - Simultaneous: All lines animate together\n    - Staggered: Lines start with delays\n    - Sequential: Lines animate one after another\n    - Per-line customization: Each line can have its own mode, colors, style\n    - Individual line control: Use animator[0] for per-line configuration\n    Example:",
         "detail": "textAnimator.multiline",
-        "documentation": {}
-    },
-    {
-        "label": "animator",
-        "kind": 5,
-        "importPath": "test1",
-        "description": "test1",
-        "peekOfCode": "animator = TextAnimator(\n    \"HELLO WORLD!\",\n    mode=\"reverse_writer\",\n    interval=0.005,\n    paint=Color.GREEN.value,\n    style=Style.BOLD,\n    flags=AnimatorFlags.HideCursor\n)\nasyncio.run(animator.start())\nwhile True:",
-        "detail": "test1",
-        "documentation": {}
-    },
-    {
-        "label": "animator",
-        "kind": 5,
-        "importPath": "test2",
-        "description": "test2",
-        "peekOfCode": "animator = MultiTextAnimator(texts=[\"Line 1\", \"Line 2\"])\n# Method chaining works!\nanimator[0](\"hello\", \"typewriter\", paint=(255, 0, 0))\nanimator[1](\"world\", \"slide\", paint=(0, 0, 255))\nasyncio.run(animator.start())",
-        "detail": "test2",
         "documentation": {}
     }
 ]
