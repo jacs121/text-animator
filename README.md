@@ -38,7 +38,7 @@ A powerful Python library for creating beautiful terminal text animations with s
 ![example 1](docs\images\example1.gif)
 
 
-![example 1](docs\images\example2.gif)
+![example 2](docs\images\example2.gif)
 
 ---
 
