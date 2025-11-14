@@ -54,8 +54,8 @@ class TextAnimator:
 
         # Events behave like Qt signals → never reset silently
         if reset_events:
-            self.__on_frame__ = RepeatEvent()
-            self.__on_complete__ = Event()
+            self.on_frame = RepeatEvent()
+            self.on_complete = Event()
 
         return self   # allows chaining: animator(text="X")(interval=0.1)
 
@@ -80,8 +80,8 @@ class TextAnimator:
         self.__flags__ = flags
 
         # events
-        self.__on_frame__ = RepeatEvent()     # fires each frame
-        self.__on_complete__ = Event()        # fires when animation ends
+        self.on_frame = RepeatEvent()     # fires each frame
+        self.on_complete = Event()        # fires when animation ends
 
     # -------------------------
     # Built-in mode executors
@@ -192,7 +192,7 @@ class TextAnimator:
 
                 print("\r" + frame_str, end="", flush=True)
 
-                await self.__on_frame__.trigger_frame(frame)
+                await self.on_frame.trigger_frame(frame)
                 await asyncio.sleep(self.__interval__)
 
         finally:
@@ -208,4 +208,4 @@ class TextAnimator:
             if self.__flags__ & AnimatorFlags.HideCursor:
                 print("\033[?25h", end="", flush=True)
 
-            await self.__on_complete__.emit(self.__text__)
+            await self.on_complete.emit(self.__text__)

@@ -231,8 +231,8 @@ class MultiTextAnimator:
         
         # Events behave like Qt signals → never reset silently
         if reset_events:
-            self.__on_text_complete__ = Event()
-            self.__on_all_complete__ = Event()
+            self.on_text_complete = Event()
+            self.on_all_complete = Event()
         
         return self  # Allows chaining
     
@@ -277,8 +277,8 @@ class MultiTextAnimator:
             self.__animators__.append(animator)
         
         # Events
-        self.__on_text_complete__ = Event()  # Fires when a line completes
-        self.__on_all_complete__ = Event()   # Fires when all lines complete
+        self.on_text_complete = Event()  # Fires when a line completes
+        self.on_all_complete = Event()   # Fires when all lines complete
         
         # State
         self.__completed_texts__ = 0
@@ -325,14 +325,14 @@ class MultiTextAnimator:
                 print(f"\r{frame_str}\033[K", end="", flush=True)  # Print and clear to end of line
                 print(f"\033[u", end="", flush=True)  # Restore cursor position
                 
-                await animator.__on_frame__.trigger_frame(frame)
+                await animator.on_frame.trigger_frame(frame)
                 await asyncio.sleep(animator.__interval__)
         
         finally:
             # Line completed
             self.__completed_texts__ += 1
-            await self.__on_text_complete__.emit(text_index)
-            await animator.__on_complete__.emit(animator.__text__)
+            await self.on_text_complete.emit(text_index)
+            await animator.on_complete.emit(animator.__text__)
     
     async def start(self):
         """Start the multi-line animation"""
@@ -374,7 +374,7 @@ class MultiTextAnimator:
             if any(a.__flags__ & AnimatorFlags.HideCursor for a in self.__animators__):
                 print("\033[?25h", end="", flush=True)
             
-            await self.__on_all_complete__.emit(None)
+            await self.on_all_complete.emit(None)
     
     async def _run_simultaneous(self):
         """Run all animations simultaneously"""

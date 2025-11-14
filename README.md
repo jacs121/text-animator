@@ -117,6 +117,8 @@ await multi.start()
 
 ```python
 from textAnimator import MODES
+from textAnimator.animator import TextAnimator
+from textAnimator.modes import register_mode
 
 # Use built-in modes
 animator = TextAnimator(text="Example", mode=MODES.SCRAMBLE)
@@ -127,7 +129,7 @@ animator = TextAnimator(text="Example", mode="typewriter")
 # Register custom modes
 def custom_mode(text, progress):
     # Your custom animation logic
-    return partial_text
+    return "partial_text"
 
 register_mode("custom", custom_mode)
 animator = TextAnimator(text="Example", mode="custom")
@@ -136,6 +138,13 @@ animator = TextAnimator(text="Example", mode="custom")
 ### Color Support
 
 ```python
+import random
+from textAnimator.animator import TextAnimator
+
+text = "COLORS!!!!"
+
+animator = TextAnimator(text)
+
 # Single RGB color
 animator(paint=(255, 0, 0))  # Red text
 
@@ -218,7 +227,8 @@ multi[0](text="New Text!")(paint=(255, 255, 0))
 ### TextConfig for Pre-Configuration
 
 ```python
-from textAnimator import TextConfig
+from textAnimator import TextConfig, MODES
+from textAnimator import MultiTextAnimator, MultiTextMode
 
 # Configure each line individually
 configs = [
@@ -237,6 +247,9 @@ multi = MultiTextAnimator(
 ### Event System
 
 ```python
+from textAnimator.multiline import MultiTextAnimator
+from textAnimator.animator import TextAnimator
+
 # Track animation progress
 async def on_complete(text):
     print(f"Completed: {text}")
@@ -252,13 +265,13 @@ animator.on_frame.connect(on_frame)
 # Multi-line events
 multi = MultiTextAnimator(lines=["Line 1", "Line 2"])
 
-async def on_line_complete(line_idx):
+async def on_text_complete(line_idx):
     print(f"Line {line_idx} completed!")
 
 async def on_all_complete(data):
     print("All lines completed!")
 
-multi.on_line_complete.connect(on_line_complete)
+multi.on_text_complete.connect(on_text_complete)
 multi.on_all_complete.connect(on_all_complete)
 ```
 
@@ -266,6 +279,7 @@ multi.on_all_complete.connect(on_all_complete)
 
 ```python
 from textAnimator import AnimatorFlags
+from textAnimator.animator import TextAnimator
 
 # Combine flags with bitwise OR
 flags = AnimatorFlags.HideCursor | AnimatorFlags.AutoNewline | AnimatorFlags.ClearScreenBefore
@@ -312,6 +326,7 @@ asyncio.run(colorful_menu())
 ### Example 2: Status Dashboard
 
 ```python
+import asyncio
 from textAnimator import MultiTextAnimator, MultiTextMode, AnimatorFlags
 
 async def status_dashboard():
@@ -401,6 +416,8 @@ asyncio.run(runtime_demo())
 ### Custom Animation Mode
 
 ```python
+import asyncio
+from textAnimator import TextAnimator
 from textAnimator.modes import register_mode
 
 def custom_wave_mode(text, progress):
@@ -415,7 +432,7 @@ def custom_wave_mode(text, progress):
             wave_text += char
         else:
             # Add wave effect for hidden characters
-            wave_text += "∼" if (i + progress * 10) % 2 < 1 else "˙"
+            wave_text += "~" if (i + progress * 10) % 2 < 1 else "˙"
   
     return wave_text
 
@@ -424,12 +441,15 @@ register_mode("wave", custom_wave_mode)
 
 # Use it
 animator = TextAnimator(text="Wave Animation", mode="wave")
-await animator.start()
+asyncio.run(animator.start())
 ```
 
 ### Complex Color Gradients
 
 ```python
+import asyncio
+from textAnimator import TextAnimator
+
 def temperature_colors(text):
     """Color text based on temperature - blue (cold) to red (hot)"""
     colors = []
@@ -443,7 +463,7 @@ def temperature_colors(text):
     return colors
 
 animator = TextAnimator(text="Temperature Gradient", paint=temperature_colors)
-await animator.start()
+asyncio.run(animator.start())
 ```
 
 ### Error Handling
