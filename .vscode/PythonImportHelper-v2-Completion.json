@@ -469,7 +469,7 @@
         "kind": 6,
         "importPath": "textAnimator.multiline",
         "description": "textAnimator.multiline",
-        "peekOfCode": "class _TextConfigurator:\n    \"\"\"\n    Configurator for individual line animations in MultiTextAnimator.\n    Allows per-line modification through indexing like: animator[0](paint=(255, 0, 0))\n    \"\"\"\n    def __init__(self, multiline_animator: 'MultiTextAnimator', text_index: int):\n        self.__multiline__ = multiline_animator\n        self.__text_index__ = text_index\n    def __call__(\n        self,",
+        "peekOfCode": "class _TextConfigurator:\n    \"\"\"\n    Configurator for individual line animations in MultiTextAnimator.\n    Allows per-line modification through indexing: animator[0](paint=(255, 0, 0))\n    \"\"\"\n    def __init__(self, multiline_animator: 'MultiTextAnimator', text_index: int):\n        self.__multiline__ = multiline_animator\n        self.__text_index__ = text_index\n    def __call__(\n        self,",
         "detail": "textAnimator.multiline",
         "documentation": {}
     },

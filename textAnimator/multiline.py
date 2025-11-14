@@ -40,7 +40,7 @@ class _TextConfigurator:
     """
     Configurator for individual line animations in MultiTextAnimator.
     
-    Allows per-line modification through indexing like: animator[0](paint=(255, 0, 0))
+    Allows per-line modification through indexing: animator[0](paint=(255, 0, 0))
     """
     
     def __init__(self, multiline_animator: 'MultiTextAnimator', text_index: int):
@@ -250,11 +250,6 @@ class MultiTextAnimator:
             lines: List of strings or TextConfig objects
             coordination: How to coordinate multiple line animations
             stagger_delay: Delay between line starts in STAGGERED mode (seconds)
-            default_mode: Default animation mode for lines without specific config
-            default_interval: Default interval for lines without specific config
-            default_paint: Default color/gradient for lines without specific config
-            default_style: Default style for lines without specific config
-            default_flags: Default flags for lines without specific config
             line_spacing: Number of blank lines between each animated line
         """
         self.__coordination__ = coordination
