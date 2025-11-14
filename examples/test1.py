@@ -6,7 +6,7 @@ from textAnimator.ansi import Color
 
 animator = TextAnimator(
     "HELLO WORLD!",
-    mode="reverse_writer",
+    mode="slide",
     interval=0.005,
     paint=Color.GREEN.value,
     style=Style.BOLD,
