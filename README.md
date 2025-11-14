@@ -1,4 +1,4 @@
-# 🎬 TextAnimator - Terminal Text Animation Library
+TextAnimator - Terminal Text Animation Library
 
 A powerful Python library for creating beautiful terminal text animations with single-line and multi-line support, individual line control, and extensive customization options.
 
