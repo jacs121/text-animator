@@ -24,12 +24,21 @@ A powerful Python library for creating beautiful terminal text animations with s
 - **Line Spacing**: Add blank lines between animated text
 - **Runtime Line Modification**: Change lines while animations are running
 
-### 🔧 Advanced Features
+### Advanced Features
 
 - **Custom Animation Modes**: Register your own animation patterns
 - **Async/Await Support**: Full async support for modern Python
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 - **No Dependencies**: Pure Python, no external packages required
+
+---
+
+### showoff
+
+![example 1](docs\images\example1.gif)
+
+
+![example 1](docs\images\example2.gif)
 
 ---
 
@@ -69,7 +78,7 @@ from textAnimator import MultiTextAnimator, MultiTextMode
 
 # Simple multi-line animation
 multi = MultiTextAnimator(
-    lines=["Line 1", "Line 2", "Line 3"],
+    texts=["Line 1", "Line 2", "Line 3"],
     coordination=MultiTextMode.SIMULTANEOUS
 )
 await multi.start()
@@ -80,7 +89,7 @@ await multi.start()
 ```python
 # Granular control with indexing pattern
 multi = MultiTextAnimator(
-    lines=["Red Line", "Green Line", "Blue Line"],
+    texts=["Red Line", "Green Line", "Blue Line"],
     default_mode=MODES.TYPEWRITER
 )
 
@@ -168,7 +177,7 @@ animator(paint=rainbow_colors)
 
 ```python
 multi = MultiTextAnimator(
-    lines=["Line 1", "Line 2", "Line 3"],
+    texts=["Line 1", "Line 2", "Line 3"],
     coordination=MultiTextMode.SIMULTANEOUS
 )
 # All three lines start animating at the same time
@@ -178,7 +187,7 @@ multi = MultiTextAnimator(
 
 ```python
 multi = MultiTextAnimator(
-    lines=["Line 1", "Line 2", "Line 3"],
+    texts=["Line 1", "Line 2", "Line 3"],
     coordination=MultiTextMode.STAGGERED,
     stagger_delay=0.5  # 0.5 second delay between each line
 )
@@ -189,7 +198,7 @@ multi = MultiTextAnimator(
 
 ```python
 multi = MultiTextAnimator(
-    lines=["Line 1", "Line 2", "Line 3"],
+    texts=["Line 1", "Line 2", "Line 3"],
     coordination=MultiTextMode.SEQUENTIAL
 )
 # Line 1 completes, then Line 2 starts, then Line 3
@@ -238,7 +247,7 @@ configs = [
 ]
 
 multi = MultiTextAnimator(
-    lines=configs,
+    texts=configs,
     coordination=MultiTextMode.STAGGERED,
     stagger_delay=0.3
 )
@@ -263,7 +272,7 @@ animator.on_complete.connect(on_complete)
 animator.on_frame.connect(on_frame)
 
 # Multi-line events
-multi = MultiTextAnimator(lines=["Line 1", "Line 2"])
+multi = MultiTextAnimator(texts=["Line 1", "Line 2"])
 
 async def on_text_complete(line_idx):
     print(f"Line {line_idx} completed!")
@@ -309,7 +318,7 @@ from textAnimator import MultiTextAnimator, MultiTextMode, TextConfig, AnimatorF
 
 async def colorful_menu():
     menu = MultiTextAnimator(
-        lines=[
+        texts=[
             TextConfig("1. Start Game", paint=(100, 255, 100)),
             TextConfig("2. Settings", paint=(100, 200, 255)),
             TextConfig("3. Exit", paint=(255, 100, 100)),
@@ -331,7 +340,7 @@ from textAnimator import MultiTextAnimator, MultiTextMode, AnimatorFlags
 
 async def status_dashboard():
     dashboard = MultiTextAnimator(
-        lines=[
+        texts=[
             "Database: Connected",
             "API: Online", 
             " Cache: Degraded",
@@ -500,7 +509,6 @@ Contributions are welcome! Please feel free to submit a Pull Request. Areas for 
 2. Install development dependencies (if any)
 3. Run tests: `python -m pytest`
 4. Submit a pull request
-
 
 **(as this is a one man project your requests may take awhile to be looked at and implemanted)**
 

@@ -11,7 +11,7 @@ animator = TextAnimator(text="Example", mode="typewriter")
 # Register custom modes
 def custom_mode(text, progress):
     # Your custom animation logic
-    return "partial_text"
+    return
 
 register_mode("custom", custom_mode)
 animator = TextAnimator(text="Example", mode="custom")
