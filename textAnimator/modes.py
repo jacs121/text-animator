@@ -6,6 +6,7 @@ class MODES(Enum):
     MARQUEE = "marquee"
     BOUNCE = "bounce"
     SCRAMBLE = "scramble"
+    STATIC = "static"
 
 # Dynamic registry
 _mode_handlers: Dict[str, Callable] = {}

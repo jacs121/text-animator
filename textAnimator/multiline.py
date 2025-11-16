@@ -20,7 +20,7 @@ class TextConfig:
     def __init__(self,
             text: str,
             mode: Union[
-                Literal["typewriter", "marquee", "bounce", "scramble", "slide"], MODES, str
+                Literal["typewriter", "marquee", "bounce", "scramble", "slide", "static"], MODES, str
             ] = MODES.TYPEWRITER,
             interval: float = 0.05,
             paint: PaintType = None,
@@ -50,7 +50,7 @@ class _TextConfigurator:
     def __call__(
         self,
         text: str | None = None,
-        mode: Union[Literal["typewriter", "marquee", "bounce", "scramble", "slide"], MODES, str, None] = None,
+        mode: Union[Literal["typewriter", "marquee", "bounce", "scramble", "slide", "static"], MODES, str, None] = None,
         interval: float | None = 0.05,
         paint: PaintType = None,
         style = None,
