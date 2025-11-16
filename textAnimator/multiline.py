@@ -10,13 +10,13 @@ from .ansi import apply_gradient, apply_style
 from .colors import rgb_to_ansi256, ansi_fg256
 
 class MultiTextMode(Enum):
-    """Multi-line animation coordination modes"""
+    """Multi-text animation coordination modes"""
     SIMULTANEOUS = "simultaneous"  # All lines animate at the same time
     STAGGERED = "staggered"        # Lines animate with delay between each
     SEQUENTIAL = "sequential"       # Lines animate one after another (wait for completion)
 
 class TextConfig:
-    """Configuration for a single line in multi-line animation"""
+    """Configuration for a single text in multi-text animation"""
     def __init__(self,
             text: str,
             mode: Union[
@@ -38,12 +38,12 @@ class TextConfig:
 
 class _TextConfigurator:
     """
-    Configurator for individual line animations in MultiTextAnimator.
+    Configurator for individual text animations in MultiTextAnimator.
     
-    Allows per-line modification through indexing: animator[0](paint=(255, 0, 0))
+    Allows per-text modification through indexing: animator[0](paint=(255, 0, 0))
     """
     
-    def __init__(self, multiline_animator: 'MultiTextAnimator', text_index: int):
+    def __init__(self, multiline_animator: 'MultiTextAnimator', text_index: int | slice):
         self.__multiline__ = multiline_animator
         self.__text_index__ = text_index
     
@@ -57,15 +57,15 @@ class _TextConfigurator:
         flags: AnimatorFlags | None = AnimatorFlags.NoFlags,
     ):
         """
-        Configure the specific line at this index.
+        Configure the specific text at this index.
         
         Args:
-            text: New text for this line
-            mode: Animation mode for this line
-            interval: Animation speed for this line
-            paint: Color/gradient for this line
-            style: Style for this line
-            flags: Flags for this line
+            text: New text for this text
+            mode: Animation mode for this text
+            interval: Animation speed for this text
+            paint: Color/gradient for this text
+            style: Style for this text
+            flags: Flags for this text
         
         Returns:
             self for chaining
@@ -76,9 +76,9 @@ class _TextConfigurator:
             animator[0](mode=MODES.SCRAMBLE)(interval=0.02)  # Chaining
         """
         if self.__text_index__ >= len(self.__multiline__.__animators__):
-            raise IndexError(f"Line index {self.__text_index__} out of range. Only {len(self.__multiline__.__animators__)} lines available.")
+            raise IndexError(f"Text index {self.__text_index__} out of range. Only {len(self.__multiline__.__animators__)} lines available.")
         
-        # Update the specific line configuration
+        # Update the specific text configuration
         config = self.__multiline__.__text_configs__[self.__text_index__]
         
         # Update provided parameters
@@ -105,30 +105,35 @@ class _TextConfigurator:
             flags=config.flags
         )
         
-        # Replace the animator at this index
+        # Replace the animator at this index or slice
+        if isinstance(self.__text_index__, slice):
+            for i in range(self.__text_index__.start, self.__text_index__.stop, self.__text_index__.step):
+                self.__multiline__.__animators__[i] = animator
+            return self
+
         self.__multiline__.__animators__[self.__text_index__] = animator
         
         return self  # Enable chaining
 
 class MultiTextAnimator:
     """
-    Multi-line text animator with synchronized coordination.
+    Multi-text text animator with synchronized coordination.
     
     Extends TextAnimator functionality to handle multiple lines with:
     - Simultaneous: All lines animate together
     - Staggered: Lines start with delays
     - Sequential: Lines animate one after another
-    - Per-line customization: Each line can have its own mode, colors, style
-    - Individual line control: Use animator[0] for per-line configuration
+    - Per-text customization: Each text can have its own mode, colors, style
+    - Individual text control: Use animator[0] for per-text configuration
     
     Example:
         animator = MultiTextAnimator(
-            lines=["Line 1", "Line 2", "Line 3"],
+            lines=["Text 1", "Text 2", "Text 3"],
             coordination=MultiTextMode.STAGGERED,
             default_mode=MODES.TYPEWRITER
         )
         
-        # Individual line control
+        # Individual text control
         animator[0](paint=(255, 0, 0))
         animator[0](text="New Text 1")
         animator[1](mode=MODES.MARQUEE)
@@ -140,17 +145,17 @@ class MultiTextAnimator:
         await animator.start()
     """
     
-    def __getitem__(self, index: int) -> _TextConfigurator:
+    def __getitem__(self, index: int | slice) -> _TextConfigurator:
         """
-        Get a configurator for the line at the specified index.
+        Get a configurator for the text at the specified index.
         
-        Allows per-line modification through indexing: animator[0](paint=(255, 0, 0))
+        Allows per-text modification through indexing/slicing: animator[0](paint=(255, 0, 0))
         
         Args:
-            index: Line index (0-based)
+            index: Text index/slice (0-based)
         
         Returns:
-            _TextConfigurator for modifying that specific line
+            _TextConfigurator for modifying that specific text
             
         Example:
             animator[0](paint=(255, 0, 0))
@@ -173,20 +178,20 @@ class MultiTextAnimator:
         Similar to TextAnimator's __call__, allows runtime modification.
         Only updates values explicitly provided (not None).
         
-        For per-line control, use: animator[0](paint=(255, 0, 0))
+        For per-text control, use: animator[0](paint=(255, 0, 0))
         
         Args:
             lines: New lines to animate (replaces all existing lines)
             coordination: New coordination mode for global control
             stagger_delay: New stagger delay for global control
-            line_spacing: New line spacing for global control
+            line_spacing: New text spacing for global control
             reset_events: If True, reset event handlers
         
         Returns:
             self for chaining
             
         Example:
-            # Individual line control
+            # Individual text control
             animator[0](texts=["New 1", "New 2"])
             animator[0](coordination=MultiTextMode.STAGGERED, stagger_delay=0.3)
             animator[0](paint=(255, 0, 0))(interval=0.02)  # Chaining
@@ -213,7 +218,7 @@ class MultiTextAnimator:
                 else:
                     self.__text_configs__.append(text)
             
-            # Rebuild animators for each line
+            # Rebuild animators for each text
             self.__animators__: list[TextAnimator] = []
             for config in self.__text_configs__:
                 animator = TextAnimator(
@@ -244,13 +249,13 @@ class MultiTextAnimator:
         text_spacing: int = 0,
     ):
         """
-        Initialize multi-line animator.
+        Initialize multi-text animator.
         
         Args:
             lines: List of strings or TextConfig objects
-            coordination: How to coordinate multiple line animations
-            stagger_delay: Delay between line starts in STAGGERED mode (seconds)
-            line_spacing: Number of blank lines between each animated line
+            coordination: How to coordinate multiple text animations
+            stagger_delay: Delay between text starts in STAGGERED mode (seconds)
+            line_spacing: Number of blank lines between each animated text
         """
         self.__coordination__ = coordination
         self.__stagger_delay__ = stagger_delay
@@ -263,7 +268,7 @@ class MultiTextAnimator:
             else:
                 self.__text_configs__.append(text)
         
-        # Create animators for each line
+        # Create animators for each text
         self.__animators__: list[TextAnimator] = []
         for config in self.__text_configs__:
             animator = TextAnimator(
@@ -277,7 +282,7 @@ class MultiTextAnimator:
             self.__animators__.append(animator)
         
         # Events
-        self.on_text_complete = Event()  # Fires when a line completes
+        self.on_text_complete = Event()  # Fires when a text completes
         self.on_all_complete = Event()   # Fires when all lines complete
         
         # State
@@ -288,11 +293,11 @@ class MultiTextAnimator:
         return self.start()
     
     async def _run_animator_at_text(self, animator: TextAnimator, text_index: int):
-        """Run a single animator and render it at a specific line position"""
+        """Run a single animator and render it at a specific text position"""
         executor = animator._get_executor()
         
         try:
-            # Calculate vertical position (account for line spacing)
+            # Calculate vertical position (account for text spacing)
             vertical_offset = text_index * (1 + self.__text_spacing__)
             
             async for frame in executor():
@@ -322,24 +327,24 @@ class MultiTextAnimator:
                         color_index = rgb_to_ansi256(*animator.__paint__)
                         frame_str = f"{ansi_fg256(color_index)}{frame_str}\033[0m"
                 
-                # Position cursor at the correct line
+                # Position cursor at the correct text
                 print(f"\033[s", end="", flush=True)  # Save cursor position
                 if vertical_offset > 0:
                     print(f"\033[{vertical_offset}B", end="", flush=True)  # Move down
-                print(f"\r{frame_str}\033[K", end="", flush=True)  # Print and clear to end of line
+                print(f"\r{frame_str}\033[K", end="", flush=True)  # Print and clear to end of text
                 print(f"\033[u", end="", flush=True)  # Restore cursor position
                 
                 await animator.on_frame.trigger_frame(frame)
                 await asyncio.sleep(animator.__interval__)
         
         finally:
-            # Line completed
+            # Text completed
             self.__completed_texts__ += 1
             await self.on_text_complete.emit(text_index)
             await animator.on_complete.emit(animator.__text__)
     
     async def start(self):
-        """Start the multi-line animation"""
+        """Start the multi-text animation"""
         try:
             # Setup
             if any(a.__flags__ & AnimatorFlags.HideCursor for a in self.__animators__):
@@ -392,8 +397,8 @@ class MultiTextAnimator:
         """Run animations with staggered start times"""
         tasks = []
         for i, animator in enumerate(self.__animators__):
-            # Add delay before starting each line
-            if i > 0:  # Don't delay the first line
+            # Add delay before starting each text
+            if i > 0:  # Don't delay the first text
                 await asyncio.sleep(self.__stagger_delay__)
             task = asyncio.create_task(self._run_animator_at_text(animator, i))
             tasks.append(task)
