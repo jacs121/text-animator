@@ -9,9 +9,9 @@ animator = TextAnimator(text="Example", mode=MODES.SCRAMBLE)
 animator = TextAnimator(text="Example", mode="typewriter")
 
 # Register custom modes
-def custom_mode(text, progress):
+def custom_mode(text):
     # Your custom animation logic
-    return
+    return text
 
 register_mode("custom", custom_mode)
 animator = TextAnimator(text="Example", mode="custom")
