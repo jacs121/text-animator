@@ -2,6 +2,8 @@ import random
 from typing import Literal, Callable, Union, Sequence, Iterable, cast
 import string
 import asyncio
+import collections.abc
+import types
 
 from textAnimator.colors import ansi_fg256, linear_gradient, rgb_to_ansi256
 from .ansi import apply_gradient, apply_style
@@ -17,7 +19,7 @@ PaintType = Union[
     None
 ]
 
-class TextAnimator:
+class TextAnimator():
     """
     Master controller.
     """
@@ -26,7 +28,7 @@ class TextAnimator:
         self,
         text: str | None = None,
         mode: Union[
-            Literal["typewriter", "marquee", "bounce", "scramble", "slide"],
+            Literal["typewriter", "marquee", "bounce", "scramble", "slide", "static"],
             MODES,
             str,
             None
@@ -63,7 +65,7 @@ class TextAnimator:
         self,
         text: str,
         mode: Union[
-            Literal["typewriter", "marquee", "bounce", "scramble", "slide"], MODES, str
+            Literal["typewriter", "marquee", "bounce", "scramble", "slide", "static"], MODES, str
         ] = MODES.TYPEWRITER,
         interval: float = 0.05,
         paint: PaintType | None = None,
@@ -82,6 +84,10 @@ class TextAnimator:
         # events
         self.on_frame = RepeatEvent()     # fires each frame
         self.on_complete = Event()        # fires when animation ends
+    
+    @property
+    def sync(self):
+        return self.start()
 
     # -------------------------
     # Built-in mode executors
@@ -121,6 +127,9 @@ class TextAnimator:
         final = self.__text__
         for i in range(len(final)):
             yield final[len(final)-i-1:]
+    
+    async def _mode_static(self):
+        yield self.__text__
 
     # -------------------------
 
@@ -142,6 +151,8 @@ class TextAnimator:
             return self._mode_scramble
         if m == "slide":
             return self._mode_slide
+        if m == "static":
+            return self._mode_static
 
         # Dynamic mode
         if m in _mode_handlers:

@@ -282,6 +282,10 @@ class MultiTextAnimator:
         
         # State
         self.__completed_texts__ = 0
+
+    @property
+    def sync(self):
+        return self.start()
     
     async def _run_animator_at_text(self, animator: TextAnimator, text_index: int):
         """Run a single animator and render it at a specific line position"""
