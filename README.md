@@ -110,7 +110,7 @@ await multi.start()
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 ### Animation Modes
 
@@ -419,7 +419,7 @@ asyncio.run(runtime_demo())
 
 ---
 
-## 🔧 Advanced Usage
+## Advanced Usage
 
 ### Custom Animation Mode
 
