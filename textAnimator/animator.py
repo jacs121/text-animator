@@ -5,7 +5,7 @@ import asyncio
 import collections.abc
 import types
 
-from textAnimator.colors import ansi_fg256, linear_gradient, rgb_to_ansi256
+from .colors import ansi_fg256, linear_gradient, rgb_to_ansi256
 from .ansi import apply_gradient, apply_style
 from .modes import MODES, _mode_handlers
 from .events import Event, RepeatEvent
@@ -135,6 +135,14 @@ class TextAnimator():
 
     def _get_executor(self) -> Callable:
         m = self.__mode__
+        
+        # Prevent TextConfig objects from being used as modes
+        if hasattr(m, 'text') and hasattr(m, 'mode'):
+            raise TypeError(
+                f"Invalid mode: expected string, enum, or callable, got TextConfig object. "
+                f"Did you accidentally pass a TextConfig as the mode parameter? "
+                f"TextConfig should be in the texts list, not the mode parameter."
+            )
 
         # Enum
         if isinstance(m, MODES):
@@ -156,7 +164,12 @@ class TextAnimator():
 
         # Dynamic mode
         if m in _mode_handlers:
-            return lambda: _mode_handlers[m](self.__text__)
+            # Use a closure that properly captures current state
+            handler = _mode_handlers[m]
+            async def _dynamic_executor():
+                async for frame in handler(self.__text__):
+                    yield frame
+            return _dynamic_executor
 
         raise ValueError("Unknown mode: " + str(m))
 

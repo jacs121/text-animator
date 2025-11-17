@@ -1,6 +1,7 @@
 import asyncio
 from typing import Literal, Union, Sequence
 from enum import Enum
+import os
 
 from typing import cast, Iterable
 from .animator import TextAnimator, PaintType
@@ -28,6 +29,12 @@ class TextConfig:
             style=None,
             flags: AnimatorFlags = AnimatorFlags.NoFlags
         ):
+        # Validate that mode is not a TextConfig object
+        if hasattr(mode, 'text') and hasattr(mode, 'mode'):
+            raise TypeError(
+                f"Invalid mode: expected string, enum, or callable, got TextConfig object. "
+                f"Did you accidentally nest TextConfig objects?"
+            )
 
         self.text = text
         self.mode = mode
@@ -76,44 +83,69 @@ class _TextConfigurator:
             animator[0](paint=(255, 0, 0))
             animator[0](mode=MODES.SCRAMBLE)(interval=0.02)  # Chaining
         """
-        if self.__text_index__ >= len(self.__multiline__.__animators__):
-            raise IndexError(f"Text index {self.__text_index__} out of range. Only {len(self.__multiline__.__animators__)} lines available.")
-        
-        # Update the specific text configuration
-        config = self.__multiline__.__text_configs__[self.__text_index__]
-        
-        # Update provided parameters
-        if text is not None:
-            config.text = text
-        if mode is not None:
-            config.mode = mode
-        if interval is not None:
-            config.interval = interval
-        if paint is not None:
-            config.paint = paint
-        if style is not None:
-            config.style = style
-        if flags is not None:
-            config.flags = flags
-        
-        # Rebuild the specific animator
-        animator = TextAnimator(
-            text=config.text,
-            mode=config.mode,
-            interval=config.interval,
-            paint=config.paint,
-            style= config.style,
-            flags=config.flags
-        )
-        
-        # Replace the animator at this index or slice
-        if isinstance(self.__text_index__, slice):
-            for i in range(self.__text_index__.start, self.__text_index__.stop, self.__text_index__.step):
-                self.__multiline__.__animators__[i] = animator
-            return self
 
-        self.__multiline__.__animators__[self.__text_index__] = animator
-        
+        if isinstance(self.__text_index__, int):
+            if self.__text_index__ >= len(self.__multiline__.__animators__):
+                raise IndexError(f"Text index {self.__text_index__} out of range. Only {len(self.__multiline__.__animators__)} lines available.")
+            # Update the specific text configuration
+            config = self.__multiline__.__text_configs__[self.__text_index__]
+            
+            # Update provided parameters
+            if text is not None:
+                config.text = text
+            if mode is not None:
+                config.mode = mode
+            if interval is not None:
+                config.interval = interval
+            if paint is not None:
+                config.paint = paint
+            if style is not None:
+                config.style = style
+            if flags is not None:
+                config.flags = flags
+            
+            # Rebuild the specific animator
+            animator = TextAnimator(
+                text=config.text,
+                mode=config.mode,
+                interval=config.interval,
+                paint=config.paint,
+                style= config.style,
+                flags=config.flags
+            )
+            
+            self.__multiline__.__animators__[self.__text_index__] = animator
+        elif isinstance(self.__text_index__, slice):
+            for i in range(self.__text_index__.start or 0, self.__text_index__.stop, self.__text_index__.step or 1):
+                if i >= len(self.__multiline__.__animators__):
+                    raise IndexError(f"Text index {i} out of range. Only {len(self.__multiline__.__animators__)} lines available.")
+                # Update the specific text configuration
+                config = self.__multiline__.__text_configs__[i]
+                
+                # Update provided parameters
+                if text is not None:
+                    config.text = text
+                if mode is not None:
+                    config.mode = mode
+                if interval is not None:
+                    config.interval = interval
+                if paint is not None:
+                    config.paint = paint
+                if style is not None:
+                    config.style = style
+                if flags is not None:
+                    config.flags = flags
+                
+                # Rebuild the specific animator
+                animator = TextAnimator(
+                    text=config.text,
+                    mode=config.mode,
+                    interval=config.interval,
+                    paint=config.paint,
+                    style= config.style,
+                    flags=config.flags
+                )
+                self.__multiline__.__animators__[i] = animator
         return self  # Enable chaining
 
 class MultiTextAnimator:
@@ -163,84 +195,6 @@ class MultiTextAnimator:
             animator[1](mode=MODES.SCRAMBLE)(text="New text")
         """
         return _TextConfigurator(self, index)
-    
-    def __call__(
-        self,
-        texts: Sequence[str | TextConfig] | None = None,
-        coordination: MultiTextMode | None = None,
-        stagger_delay: float | None = None,
-        text_spacing: int | None = None,
-        *,
-        reset_events: bool = False,
-    ):
-        """
-        Update animation parameters on the fly.
-        
-        Similar to TextAnimator's __call__, allows runtime modification.
-        Only updates values explicitly provided (not None).
-        
-        For per-text control, use: animator[0](paint=(255, 0, 0))
-        
-        Args:
-            lines: New lines to animate (replaces all existing lines)
-            coordination: New coordination mode for global control
-            stagger_delay: New stagger delay for global control
-            line_spacing: New text spacing for global control
-            reset_events: If True, reset event handlers
-        
-        Returns:
-            self for chaining
-            
-        Example:
-            # Individual text control
-            animator[0](texts=["New 1", "New 2"])
-            animator[0](coordination=MultiTextMode.STAGGERED, stagger_delay=0.3)
-            animator[0](paint=(255, 0, 0))(interval=0.02)  # Chaining
-            
-            # Global control
-            animator(coordination=MultiTextMode.SIMULTANEOUS)
-            animator(default_paint=(0, 255, 0))(default_interval=0.05)  # Chaining
-        """
-        # Update coordination settings
-        if coordination is not None:
-            self.__coordination__ = coordination
-        if stagger_delay is not None:
-            self.__stagger_delay__ = stagger_delay
-        if text_spacing is not None:
-            self.__text_spacing__ = text_spacing
-        
-        # Update lines (requires rebuilding animators)
-        if texts is not None:
-            # Convert lines to TextConfig objects
-            self.__text_configs__: list[TextConfig] = []
-            for text in texts:
-                if isinstance(text, str):
-                    self.__text_configs__.append(TextConfig(text=text))
-                else:
-                    self.__text_configs__.append(text)
-            
-            # Rebuild animators for each text
-            self.__animators__: list[TextAnimator] = []
-            for config in self.__text_configs__:
-                animator = TextAnimator(
-                    text=config.text,
-                    mode=config.mode,
-                    interval=config.interval,
-                    paint=config.paint,
-                    style=config.style,
-                    flags=config.flags,
-                )
-                self.__animators__.append(animator)
-            
-            # Reset completion counter
-            self.__completed_texts__ = 0
-        
-        # Events behave like Qt signals → never reset silently
-        if reset_events:
-            self.on_text_complete = Event()
-            self.on_all_complete = Event()
-        
-        return self  # Allows chaining
     
     def __init__(
         self,
@@ -373,7 +327,7 @@ class MultiTextAnimator:
                 print(f"\033[{total_texts}B", end="", flush=True)  # Move to bottom
             
             if any(a.__flags__ & AnimatorFlags.ClearScreenAfter for a in self.__animators__):
-                print("\033[2J\033[H", end="", flush=True)
+                os.system("cls" if os.name == "win" else "clear")
             
             if any(a.__flags__ & AnimatorFlags.AutoNewline for a in self.__animators__):
                 print()
