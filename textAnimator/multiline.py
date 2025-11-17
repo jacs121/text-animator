@@ -2,12 +2,13 @@ import asyncio
 from typing import Literal, Union, Sequence
 from enum import Enum
 
+from typing import cast, Iterable
 from .animator import TextAnimator, PaintType
 from .modes import MODES
 from .flags import AnimatorFlags
 from .events import Event
 from .ansi import apply_gradient, apply_style
-from .colors import rgb_to_ansi256, ansi_fg256
+from .colors import ansi_fg256, linear_gradient, rgb_to_ansi256
 
 class MultiTextMode(Enum):
     """Multi-text animation coordination modes"""
@@ -309,17 +310,14 @@ class MultiTextAnimator:
                         frame_str = apply_style(frame_str, animator.__style__)
                 else:
                     if callable(animator.__paint__):
-                        from typing import cast, Iterable
                         colors = animator.__paint__(frame_str)
                         frame_str = apply_gradient(frame_str, cast(Iterable[tuple[int,int,int]], colors))
                     elif isinstance(animator.__paint__, list) or (isinstance(animator.__paint__, tuple) and len(animator.__paint__) > 0 and isinstance(animator.__paint__[0], tuple)):
                         if len(animator.__paint__) == 2 and all(isinstance(c, tuple) and len(c) == 3 for c in animator.__paint__):
-                            from .colors import linear_gradient
                             start, end = animator.__paint__
                             grad = linear_gradient(start, end, len(frame_str))
                             frame_str = apply_gradient(frame_str, grad)
                         else:
-                            from typing import cast, Iterable
                             if len(animator.__paint__) != len(frame_str):
                                 raise ValueError("Length of paint list must match text length")
                             frame_str = apply_gradient(frame_str, cast(Iterable[tuple[int,int,int]], animator.__paint__))
