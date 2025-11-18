@@ -303,15 +303,8 @@ class MultiTextAnimator:
                 print("\033[?25l", end="", flush=True)
             
             if any(a.__flags__ & AnimatorFlags.ClearScreenBefore for a in self.__animators__):
-                print("\033[2J\033[H", end="", flush=True)
-            
-            # Reserve space for all lines
-            total_texts = len(self.__animators__) * (1 + self.__text_spacing__)
-            for _ in range(total_texts):
-                print()
-            if total_texts > 0:
-                print(f"\033[{total_texts}A", end="", flush=True)  # Move cursor back to top
-            
+                os.system("cls" if os.name == "win" else "clear")
+
             # Run animations based on coordination mode
             if self.__coordination__ == MultiTextMode.SIMULTANEOUS:
                 await self._run_simultaneous()

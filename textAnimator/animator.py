@@ -2,8 +2,7 @@ import random
 from typing import Literal, Callable, Union, Sequence, Iterable, cast
 import string
 import asyncio
-import collections.abc
-import types
+import os
 
 from .colors import ansi_fg256, linear_gradient, rgb_to_ansi256
 from .ansi import apply_gradient, apply_style
@@ -182,8 +181,13 @@ class TextAnimator():
                 print("\033[?25l", end="", flush=True)
             if self.__flags__ & AnimatorFlags.ClearScreenBefore:
                 print("\033[2J\033[H", end="", flush=True)
+            
+            frame_str = ""
 
             async for frame in executor():
+                if frame_str and self.__flags__ & AnimatorFlags.ClearLineBefore:
+                    print(f"\r{len(frame_str)*" "}\r", end="", flush=True)
+                
                 frame_str = frame
 
                 if self.__paint__ is None:
@@ -221,10 +225,13 @@ class TextAnimator():
 
         finally:
             if self.__flags__ & AnimatorFlags.ClearScreenAfter:
-                print("\033[2J\033[H", end="")
+                os.system("cls" if os.name == "win" else "clear")
 
             if self.__flags__ & AnimatorFlags.KeepLastFrame:
                 print("\r\033[2K\r", end="")
+
+            if self.__flags__ & AnimatorFlags.ClearLineAfter:
+                print(f"\r{len(frame_str)*" "}\r", end="", flush=True)
 
             if self.__flags__ & AnimatorFlags.AutoNewline:
                 print()

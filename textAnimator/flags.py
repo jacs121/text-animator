@@ -9,4 +9,4 @@ class AnimatorFlags(IntFlag):
     ClearScreenAfter = auto()     # Clear entire terminal after complete
     KeepLastFrame = auto()        # After finishing, leave last frame (no cleanup)
     AutoNewline = auto()          # Print newline after animation stops
-    ErasePreviousFrame = auto()   # Clear previous printed frame
+    ClearLineAfter = auto()   # Clear line after each frame
