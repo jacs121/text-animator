@@ -2,7 +2,7 @@ from enum import IntFlag, auto
 
 class AnimatorFlags(IntFlag):
     NoFlags = 0
-
+    NONE = auto()
     HideCursor = auto()          # Hide terminal cursor during animation
     ClearLineBefore = auto()      # Clear line before each frame
     ClearScreenBefore = auto()    # Clear entire terminal before start

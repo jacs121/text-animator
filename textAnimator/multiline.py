@@ -1,7 +1,9 @@
 import asyncio
+import sys
 from typing import Literal, Union, Sequence
 from enum import Enum
-import os
+import os, io
+from contextlib import redirect_stdout
 
 from typing import cast, Iterable
 from .animator import TextAnimator, PaintType
@@ -62,7 +64,7 @@ class _TextConfigurator:
         interval: float | None = 0.05,
         paint: PaintType = None,
         style = None,
-        flags: AnimatorFlags | None = AnimatorFlags.NoFlags,
+        flags: AnimatorFlags = AnimatorFlags.NONE,
     ):
         """
         Configure the specific text at this index.
@@ -83,7 +85,6 @@ class _TextConfigurator:
             animator[0](paint=(255, 0, 0))
             animator[0](mode=MODES.SCRAMBLE)(interval=0.02)  # Chaining
         """
-
         if isinstance(self.__text_index__, int):
             if self.__text_index__ >= len(self.__multiline__.__animators__):
                 raise IndexError(f"Text index {self.__text_index__} out of range. Only {len(self.__multiline__.__animators__)} lines available.")
@@ -101,7 +102,7 @@ class _TextConfigurator:
                 config.paint = paint
             if style is not None:
                 config.style = style
-            if flags is not None:
+            if not flags & AnimatorFlags.NONE:
                 config.flags = flags
             
             # Rebuild the specific animator
@@ -133,7 +134,7 @@ class _TextConfigurator:
                     config.paint = paint
                 if style is not None:
                     config.style = style
-                if flags is not None:
+                if not flags & AnimatorFlags.NONE:
                     config.flags = flags
                 
                 # Rebuild the specific animator
@@ -195,7 +196,7 @@ class MultiTextAnimator:
             animator[1](mode=MODES.SCRAMBLE)(text="New text")
         """
         return _TextConfigurator(self, index)
-    
+
     def __init__(
         self,
         texts: Sequence[str | TextConfig],
@@ -250,14 +251,24 @@ class MultiTextAnimator:
     async def _run_animator_at_text(self, animator: TextAnimator, text_index: int):
         """Run a single animator and render it at a specific text position"""
         executor = animator._get_executor()
-        
+        # Create a string buffer
+        # Save the current stdout and redirect it to the buffer
         try:
             # Calculate vertical position (account for text spacing)
             vertical_offset = text_index * (1 + self.__text_spacing__)
             
             async for frame in executor():
                 frame_str = frame
+                # Position cursor at the correct text
+                print(f"\033[s", end="", flush=True)  # Save cursor position
+                if vertical_offset > 0:
+                    print(f"\033[{vertical_offset}B", end="", flush=True)  # Move down
                 
+                if animator.__flags__ & AnimatorFlags.HideCursor:
+                    print("\033[?25l", end="", flush=True)
+                if animator.__flags__ & AnimatorFlags.ClearLineBefore:
+                    print("\r", end="", flush=True)
+                    
                 # Apply coloring (same logic as TextAnimator.start)
                 if animator.__paint__ is None:
                     if animator.__style__:
@@ -279,16 +290,17 @@ class MultiTextAnimator:
                         color_index = rgb_to_ansi256(*animator.__paint__)
                         frame_str = f"{ansi_fg256(color_index)}{frame_str}\033[0m"
                 
-                # Position cursor at the correct text
-                print(f"\033[s", end="", flush=True)  # Save cursor position
-                if vertical_offset > 0:
-                    print(f"\033[{vertical_offset}B", end="", flush=True)  # Move down
                 print(f"\r{frame_str}\033[K", end="", flush=True)  # Print and clear to end of text
-                print(f"\033[u", end="", flush=True)  # Restore cursor position
+                print("\033[u", end="", flush=True)
                 
                 await animator.on_frame.trigger_frame(frame)
                 await asyncio.sleep(animator.__interval__)
-        
+                
+                if animator.__flags__ & AnimatorFlags.KeepLastFrame:
+                    print("\r\033[2K\r", end="", flush=True)
+            if not animator.__flags__ & AnimatorFlags.ClearLineAfter:
+                print('\x1b[4A', end="", flush=True)
+                print("\b", end="", flush=True)
         finally:
             # Text completed
             self.__completed_texts__ += 1

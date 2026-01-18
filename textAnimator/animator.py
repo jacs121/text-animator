@@ -36,7 +36,7 @@ class TextAnimator():
         paint: PaintType | None = None,
         style=None,
         *,
-        flags: AnimatorFlags | None = None,
+        flags: AnimatorFlags = AnimatorFlags.NONE,
         reset_events: bool = False,   # <── optional, Qt-like explicit reset
     ):
         # Update only values explicitly provided
@@ -50,7 +50,7 @@ class TextAnimator():
             self.__paint__ = paint
         if style is not None:
             self.__style__ = style
-        if flags is not None:
+        if not flags & AnimatorFlags.NONE:
             self.__flags__ = flags
 
         # Events behave like Qt signals → never reset silently
@@ -83,6 +83,7 @@ class TextAnimator():
         # events
         self.on_frame = RepeatEvent()     # fires each frame
         self.on_complete = Event()        # fires when animation ends
+        self.__prev_line__ = 0
     
     @property
     def sync(self):
@@ -180,14 +181,15 @@ class TextAnimator():
             if self.__flags__ & AnimatorFlags.HideCursor:
                 print("\033[?25l", end="", flush=True)
             if self.__flags__ & AnimatorFlags.ClearScreenBefore:
-                print("\033[2J\033[H", end="", flush=True)
-            
+                os.system("cls" if os.name == "win" else "clear")
+            if self.__flags__ & AnimatorFlags.ClearLineBefore:
+                print("\r"+" "*os.get_terminal_size().columns, end="")
+            if self.__flags__ & AnimatorFlags.KeepLastFrame:
+                print(f"\033[1000c", end="")
+
             frame_str = ""
 
             async for frame in executor():
-                if frame_str and self.__flags__ & AnimatorFlags.ClearLineBefore:
-                    print(f"\r{len(frame_str)*" "}\r", end="", flush=True)
-                
                 frame_str = frame
 
                 if self.__paint__ is None:
@@ -218,7 +220,7 @@ class TextAnimator():
                         color_index = rgb_to_ansi256(*self.__paint__)
                         frame_str = f"{ansi_fg256(color_index)}{frame_str}\033[0m"
 
-                print("\r" + frame_str, end="", flush=True)
+                print("\r"+frame_str, end="", flush=True)
 
                 await self.on_frame.trigger_frame(frame)
                 await asyncio.sleep(self.__interval__)
@@ -226,16 +228,10 @@ class TextAnimator():
         finally:
             if self.__flags__ & AnimatorFlags.ClearScreenAfter:
                 os.system("cls" if os.name == "win" else "clear")
-
-            if self.__flags__ & AnimatorFlags.KeepLastFrame:
-                print("\r\033[2K\r", end="")
-
             if self.__flags__ & AnimatorFlags.ClearLineAfter:
-                print(f"\r{len(frame_str)*" "}\r", end="", flush=True)
-
+                print("\r"+" "*os.get_terminal_size().columns, end="")
             if self.__flags__ & AnimatorFlags.AutoNewline:
-                print()
-
+                print("", flush=True)
             if self.__flags__ & AnimatorFlags.HideCursor:
                 print("\033[?25h", end="", flush=True)
 

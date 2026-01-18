@@ -1,7 +1,7 @@
 import asyncio
 import random
 import textAnimator
-from textAnimator.multiline import MultiTextMode, TextConfig
+from textAnimator.multiline import TextConfig
 from textAnimator.flags import AnimatorFlags
 
 @textAnimator.register_mode("typeDeleter")
@@ -10,7 +10,6 @@ async def typeDeleter(text):
         yield text[:-i]+" "*i
 
 num = 4
-
 animator = textAnimator.MultiTextAnimator([TextConfig(" ", mode="static", flags=AnimatorFlags.ClearLineBefore)]*num)
 while True:
     lengths = [random.randint(2, 8) for _ in range(num)]
@@ -18,7 +17,6 @@ while True:
     for i in range(num):
         animator[i](">"*lengths[i], mode="typewriter")
     asyncio.run(animator.sync)
-    # input()
     for i in range(num):
         animator[i](">"*lengths[i], mode="typeDeleter")
     asyncio.run(animator.sync)
