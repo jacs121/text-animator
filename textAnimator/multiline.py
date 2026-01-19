@@ -213,6 +213,7 @@ class MultiTextAnimator:
             stagger_delay: Delay between text starts in STAGGERED mode (seconds)
             line_spacing: Number of blank lines between each animated text
         """
+        raise Warning("WARNING: multiline text animator had been put on hold as it's too complicated for the current development, do not use")
         self.__coordination__ = coordination
         self.__stagger_delay__ = stagger_delay
         self.__text_spacing__ = text_spacing

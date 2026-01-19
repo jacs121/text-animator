@@ -184,10 +184,7 @@ class TextAnimator():
                 os.system("cls" if os.name == "win" else "clear")
             if self.__flags__ & AnimatorFlags.ClearLineBefore:
                 print("\r"+" "*os.get_terminal_size().columns, end="")
-            if self.__flags__ & AnimatorFlags.KeepLastFrame:
-                print(f"\033[1000c", end="")
-
-            frame_str = ""
+            last_frame_str = frame_str = ""
 
             async for frame in executor():
                 frame_str = frame
@@ -220,7 +217,8 @@ class TextAnimator():
                         color_index = rgb_to_ansi256(*self.__paint__)
                         frame_str = f"{ansi_fg256(color_index)}{frame_str}\033[0m"
 
-                print("\r"+frame_str, end="", flush=True)
+                print(("\b"*len(last_frame_str) if self.__flags__ & AnimatorFlags.KeepLastFrame else "\r")+frame_str, end="", flush=True)
+                last_frame_str = frame_str
 
                 await self.on_frame.trigger_frame(frame)
                 await asyncio.sleep(self.__interval__)
